@@ -1,18 +1,17 @@
-
 #include<vector>
-using namespace std;
 
 class Processus {
-private :
-	int nb_param ;
-	template <class T> vector<T> param;
-	double first;
+protected :
+	std::vector<double> param_t;
+	double t;
+	double val_t;
+	int nb_MB;
 
 public :
-	int get_nb_param();
-	template <class T> vector<T> get_param();
-	double get_first();
-	Processus(int nb,vector<double> p,double x0); 
-	virtual double getNext(double delta_t);
-	virtual double simul(double delta_t,double T);
-}
+	double getVal();
+	double getTime();
+	std::vector<double> getParam();
+	void setParam(std::vector<double> new_param);
+	virtual double next_simu(double delta,std::vector<double> alea,double prev) =0;
+	int getNbMB();
+};
