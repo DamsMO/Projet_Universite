@@ -2,10 +2,11 @@
 #include<time.h>
 #include<math.h>
 #include<cmath>
+#include "csvRead.h"
 
 using namespace std;
 
-static class Generateur {
+class Generateur {
 private :
 	
 	static vector<vector<vector<double>>> stockage(vector<double> alea,int nb_var,int nb_pas_de_temps,int nb_simu) {
@@ -41,9 +42,17 @@ public :
 	
 		//Creation de l'alea
 		int nbAlea = nb_var*nb_pas_de_temps*nb_simu;
-		vector<double> alea = vector<double>(nbAlea);
-
-		return stockage(alea,nb_var,nb_pas_de_temps,nb_simu);
+		csvRead csvAlea = csvRead("Sobol_600__10000.csv");//Sobol_600__10000.csv
+		vector<vector<double>> alea = csvAlea.getval();
+		for(int i=0;i<nb_var;i++) {
+			for(int j=0;j<nb_pas_de_temps;j++) {
+				cout << alea[i][j] ;
+			}
+			cout <<endl;
+		}
+		 vector<vector<vector<double>>> tmp;
+		 return tmp;
+	//	return stockage(alea,nb_var,nb_pas_de_temps,nb_simu);
 		
 	}
 

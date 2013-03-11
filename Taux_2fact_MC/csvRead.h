@@ -14,6 +14,7 @@ public:
 	int getnrow() {return nrow;}
 	int getncol() {return ncol;}
 	double getval(int i, int j); //renvoie la valeur de la ième ligne (sans compter la ligne header) et jème colonne
+	std::vector<std::vector<double>> getval();
 	std::string getheader(int k); //renvoie le kème header
 private:
 	std::vector<std::vector<double>> val;

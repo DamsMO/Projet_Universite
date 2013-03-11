@@ -6,6 +6,7 @@
 using namespace std;
 csvRead::csvRead(const string &file)
 {
+cout << "ON va lire le fichier : " << file << endl;
   nrow=0;
 	ncol=1;
 	ifstream fichier(file, ios::in);
@@ -74,11 +75,15 @@ csvRead::csvRead(const string &file)
 				}
 			}
                 fichier.close();  // on ferme le fichier
+				cout << "FIN de la lecture" <<endl;
 	}
         else 
                 cout<< "impossible d'ouvrir le fichier !" << endl;
 }
 
+std::vector<std::vector<double>> csvRead::getval() {
+	return val;
+}
 
 double csvRead::getval(int i, int j)
 {
