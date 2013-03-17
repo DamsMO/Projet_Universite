@@ -5,7 +5,7 @@
 
 std::vector<std::vector<double>> cholesky(std::vector<std::vector<double>> CorrMatrix)
 {
-  //Fais la décomposition de cholesky de la matrice de corrélation
+	//Fais la décomposition de cholesky de la matrice de corrélation
 	int d=CorrMatrix.size();
 	std::vector<std::vector<double>> A;
 	double sum1=0.0;
@@ -20,11 +20,16 @@ std::vector<std::vector<double>> cholesky(std::vector<std::vector<double>> CorrM
 	}
 	for(int i=1;i<d;i++)
 	{
-		sum1=sum1+A[i][i-1]*A[i][i-1];
+		sum1=0.0;
+		for(int k=0;k<=i-1;k++)
+			sum1=sum1+A[i][k]*A[i][k];
+		//sum1=sum1+A[i][i-1]*A[i][i-1];
 		A[i][i]=sqrt(CorrMatrix[i][i]-sum1);
 		for(int j=i+1;j<d;j++)
 		{
-			sum2=sum2+A[i][i-1]*A[j][i-1];
+			sum2=0.0;
+			for(int k=0;k<=i-1;k++)
+				sum2=sum2+A[i][k]*A[j][k];
 			A[j][i]=(CorrMatrix[i][j]-sum2)/(A[i][i]);
 			A[i][j]=0.0;
 		}
