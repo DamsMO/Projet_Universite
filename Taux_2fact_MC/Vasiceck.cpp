@@ -2,6 +2,7 @@
 #include<stdio.h>
 #include<iostream>
 #include<string>
+#include "Outils.h"
 
 //drt = a(b-rt)dt + vol*dWt
 class Vasiceck : public Taux { 
@@ -10,7 +11,12 @@ private : //param : 0 = a, 1 = b, 2 = vol
 
 public :
 	std::string toString() {
-		return "Vasiceck Processus";
+		std::string res;
+		res += "Vasiceck Processus";
+		res+= "type de simu : " + getType() +"\n";
+		res+="Temps de la simu : " + Outils::toString(getTime())+"\n";
+		res+= "Val actuel du process : " + Outils::toString(getVal()) +"\n";
+		res+="Ce process nécessite " + Outils::toString(getNbMB()) + " mouvements Browniens"+"\n";
 	}
 
 	std::string getType() {
@@ -21,7 +27,7 @@ public :
 		}
 	}
 
-	Vasiceck(double init,std::vector<double> param_init,vector<double> ZC_initial,
+	Vasiceck(double init,double delta,double nb_simu,std::vector<double> param_init,vector<double> ZC_initial,
 	vector<double> echeancier) throw(std::string) {
 		this->echeancier = echeancier;
 		this->ZC_initial = ZC_initial;
@@ -37,7 +43,7 @@ public :
 		}
 	}
 
-	Vasiceck(double init,std::vector<double> param_init,int type,vector<double> ZC_initial,
+	Vasiceck(double init,double delta,double nb_simu,std::vector<double> param_init,int type,vector<double> ZC_initial,
 	vector<double> echeancier) throw(std::string) {
 		if(type ==1 || type ==2) {
 			type_simu = type;
@@ -57,7 +63,7 @@ public :
 		}
 	}
 
-	Vasiceck(double init,std::vector<double> param_init,std::string fileZCinit) throw(std::string) {
+	Vasiceck(double init,double delta,double nb_simu,std::vector<double> param_init,std::string fileZCinit) throw(std::string) {
 		csvRead file = csvRead(fileZCinit);
 		this->echeancier = file.getval()[0];
 		this->ZC_initial = file.getval()[1];
@@ -73,7 +79,7 @@ public :
 		}
 	}
 
-	Vasiceck(double init,std::vector<double> param_init,int type,std::string fileZCinit) throw(std::string) {
+	Vasiceck(double init,double delta,double nb_simu,std::vector<double> param_init,int type,std::string fileZCinit) throw(std::string) {
 		if(type ==1 || type ==2) {
 			type_simu = type;
 			nb_MB = 1;
@@ -95,7 +101,7 @@ public :
 		}
 	}
 
-	virtual void Vasiceck::next_simu(double delta,std::vector<double> alea) throw(std::string) {
+	void Vasiceck::next_simu(std::vector<double> alea) throw(std::string) {
 		if(alea.size()<1) {
 			throw("Pas d'alea donnée en entrée (Vasiceck Simu)");
 		}else{
@@ -117,13 +123,44 @@ public :
 		}
 	}
 
-	double getZC(double T) {
-		return 0;
+	 double getZC(double T) {
+		double AtT;
+		double BtT;
+		BtT = (1-exp(-param_t[0]*(T-t)))/param_t[0];
+		AtT = exp((param_t[1] -param_t[2]*param_t[2]/(2*param_t[0]*param_t[0]))*(BtT - T -t) - param_t[2]*param_t[2]*BtT*BtT/(4*param_t[0]));
+		return AtT*exp(-BtT*val_t);
 	}
-	double getCap(double T,double DeltaT) {
-		return 0;
+
+	double getBondOptionE(double T,double S,double K,int type) {//1 - Call, 2- Put
+		if (S>T && ZC_initial.size() < S/delta +1) {
+			int w;
+			if (type==1) {
+				w=1;
+			}else{
+				w=-1;
+			}
+			double vol = param_t[2]*sqrt((1-exp(-2*param_t[0]*(T-t)))/param_t[0])*(1-exp(-param_t[0]*(S-T)))/param_t[0];
+			double h = log(ZC_initial[T/delta]/(ZC_initial[S/delta]*K))/vol + vol/2;
+			return w*(ZC_initial[S/delta]*Outils::RepartitionNormal(w*h) - K*ZC_initial[T/delta]*Outils::RepartitionNormal(w*(h-vol))); 
+		}else{
+			return -1;
+		}
 	}
-	double getSwaption(double T1,double T2,double DeltaT) {
+
+	 double getCap(double T,double deltaT,double K) {
+		double somme_caplet = 0;
+		int n = T/deltaT;
+		for(int i=0;i<n;i++) {
+			double caplet = (1+K*deltaT)*getBondOptionE(i*deltaT,(i+1)*deltaT,1/(1+K*deltaT),2);
+			if(caplet = -1) {
+				cout <<"problème dans l'échéancier" <<endl;
+			}
+			somme_caplet += caplet;	
+		}
+		return somme_caplet;
+	}
+
+	 double getSwaption(double T1,double T2,double DeltaT) {
 		return 0;
 	}
 
